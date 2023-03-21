@@ -1,6 +1,5 @@
 # K8s setup scripts
 This repository includes some bash scripts to set up a Kubernetes cluster.
-
 The scripts are made for VMs only with debian installed.
 
 > **Warning**
