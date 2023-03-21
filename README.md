@@ -7,15 +7,18 @@ The scripts are made for VMs only with debian installed.
 > You should allways check if some steps changed!
 > Go through the [kubernetes docs](https://kubernetes.io) for offical instalation instructions.
 
+> **Warning**
+> You eventually have to Update versions!
+
 
 ## Requirements
  - Debian 11
  - Access to root user
 
-### node-setup.sh
+## node-setup.sh
 Setup everything to run Kubernetes master or worker
 
-#### What happens
+### What happens
  - Create ``k8s`` user
    - Put this user to sudoers
    - Copy ``authorized_keys`` from root user
@@ -26,10 +29,10 @@ Setup everything to run Kubernetes master or worker
    - kubeadm
    - kubectl
 
-### initialize-master.sh
+## initialize-master.sh
 Initialize master for topology with **ONE** master
 
-#### What happens
+### What happens
  - Create kubeadm-config.yaml
  - kubeadm init
  - Set .kube config
