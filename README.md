@@ -3,14 +3,15 @@ This repository includes some bash scripts to set up a Kubernetes cluster.
 
 The scripts are made for VMs only with debian installed.
 
+> **Warning**
+> The repo follwes the [kubernetes docs](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/).
+> You should allways check if some steps changed!
+> Go through the [kubernetes docs](https://kubernetes.io) for offical instalation instructions.
+
+
 ## Requirements
  - Debian 11
  - Access to root user
-
- > **Warning**
- > The repo follwes the [kubernetes docs](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/).
- > You should allways check if some steps changed!
- > Go through the [kubernetes docs](https://kubernetes.io) for offical instalation instructions.
 
 ### node-setup.sh
 Setup everything to run Kubernetes master or worker
