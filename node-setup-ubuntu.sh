@@ -6,7 +6,7 @@ K8S_VERSION="1.25.*-00"
 
 # Set Hostname
 hostnamectl set-hostname $NEW_HOSTNAME
-sed -i 's/debian/'$NEW_HOSTNAME'/g' /etc/hosts
+sed -i 's/ubuntu/'$NEW_HOSTNAME'/g' /etc/hosts
 
 # Add user IF PASSWORD IS WRONG SET USE "passwd k8s" TO RESET
 useradd -m -p $(perl -e 'print crypt($ARGV[0], "password")' $K8S_USER_PW) -s /bin/bash -c "Kubernetes account, , , " k8s
@@ -32,9 +32,9 @@ sudo apt-get install \
     gnupg \
     lsb-release -y
 sudo mkdir -m 0755 -p /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
   $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 sudo apt-get update
 sudo apt-get install containerd.io -y
