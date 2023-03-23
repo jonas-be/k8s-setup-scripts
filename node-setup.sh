@@ -61,6 +61,7 @@ sudo systemctl restart containerd
 sudo containerd config default > /etc/containerd/config.toml
 sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
 sudo systemctl restart containerd
+sudo swapoff -a
 
 
 # Install kubelet, kubeadm, kubectl

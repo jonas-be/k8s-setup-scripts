@@ -12,7 +12,7 @@ The scripts are made for VMs only with debian installed.
 
 
 ## Requirements
- - Debian 11
+ - Debian or Ubuntu
  - Access to root user
 
 ## node-setup.sh
@@ -23,7 +23,8 @@ Setup everything to run Kubernetes master or worker
    - Put this user to sudoers
    - Copy ``authorized_keys`` from root user
  - Update system
- - Install [containerD](https://containerd.io)
+ - Install [containerd](https://containerd.io)
+ - Configure Kubernetes required stuff
  - Install
    - kubelet
    - kubeadm
