@@ -18,7 +18,8 @@ The scripts are made for VMs only with debian installed.
 ## Versions
 Currently used Version in the scripts:
  - Kubernetes: stable-1.25
- - Containerd: version from [docker download](https://download.docker.com/linux/)
+ - Containerd: version from [Docker download](https://download.docker.com/linux/)
+ - Use [Calico](https://projectcalico.org) v3.24 as Pod network
 
 ## node-setup.sh
 Setup everything to run Kubernetes master or worker
