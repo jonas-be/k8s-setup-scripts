@@ -15,6 +15,11 @@ The scripts are made for VMs only with debian installed.
  - Debian or Ubuntu
  - Access to root user
 
+## Versions
+Currently used Version in the scripts:
+ - Kubernetes: stable-1.25
+ - Containerd: version from [docker download](https://download.docker.com/linux/)
+
 ## node-setup.sh
 Setup everything to run Kubernetes master or worker
 

@@ -1,9 +1,10 @@
 #!/bin/bash
+# Initialize master for topology with ONE master
 
 cd
 
 # Config
-#   PLEASE USE: "--config kubeadm-config.yaml" IN "kubeadm init"
+#   USE: "--config kubeadm-config.yaml" IN "kubeadm init"
 echo '# kubeadm-config.yaml
 kind: ClusterConfiguration
 apiVersion: kubeadm.k8s.io/v1beta3
