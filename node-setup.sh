@@ -73,4 +73,4 @@ sudo apt-get update
 sudo apt install -y kubelet=$K8S_VERSION kubeadm=$K8S_VERSION kubectl=$K8S_VERSION -y --allow-change-held-packages --allow-downgrades
 sudo apt-mark hold kubelet kubeadm kubectl
 
-# Now you have to initialize as a controll plane or join the cluster
+# Now you have to initialize as a control plane or join the cluster
