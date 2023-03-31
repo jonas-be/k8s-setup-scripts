@@ -13,8 +13,8 @@ AUTH_PASS=42
 APISERVER_VIP=ionos-k8s.jonasbe.de
 APISERVER_DEST_PORT=6443
 APISERVER_SRC_PORT=6443
-HOST1_ID=jb-k8s-master-02
-HOST1_ADDRESS=85.215.238.10
+HOST1_ID=jb-k8s-master-01
+HOST1_ADDRESS=85.215.193.16
 
 mkdir /etc/keepalived
 echo "! /etc/keepalived/keepalived.conf

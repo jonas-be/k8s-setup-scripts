@@ -1,5 +1,8 @@
 #!/bin/bash
 # Initialize master for topology with ONE master
+# !!!
+# !!! First create a ssh key on the master cp and get access to the other cps
+# !!!
 
 cd
 
@@ -15,11 +18,11 @@ AUTH_PASS=42
 APISERVER_VIP=ionos-k8s.jonasbe.de
 APISERVER_DEST_PORT=6443
 APISERVER_SRC_PORT=6443
-HOST1_ID=jb-k8s-master-02
-HOST1_ADDRESS=85.215.238.10
+HOST1_ID=jb-k8s-master-01
+HOST1_ADDRESS=85.215.193.16
 
-mkdir /etc/keepalived
-echo "! /etc/keepalived/keepalived.conf
+sudo mkdir /etc/keepalived
+sudo echo "! /etc/keepalived/keepalived.conf
       ! Configuration File for keepalived
       global_defs {
           router_id LVS_DEVEL
@@ -47,9 +50,9 @@ echo "! /etc/keepalived/keepalived.conf
           track_script {
               check_apiserver
           }
-      }" |tee /etc/keepalived/keepalived.conf
+      }" |sudo tee /etc/keepalived/keepalived.conf
 
-echo "#!/bin/sh
+sudo echo "#!/bin/sh
 
       errorExit() {
           echo "*** $*" 1>&2
@@ -59,10 +62,10 @@ echo "#!/bin/sh
       curl --silent --max-time 2 --insecure https://localhost:${APISERVER_DEST_PORT}/ -o /dev/null || errorExit "Error GET https://localhost:${APISERVER_DEST_PORT}/"
       if ip addr | grep -q ${APISERVER_VIP}; then
           curl --silent --max-time 2 --insecure https://${APISERVER_VIP}:${APISERVER_DEST_PORT}/ -o /dev/null || errorExit "Error GET https://${APISERVER_VIP}:${APISERVER_DEST_PORT}/"
-      fi" |tee /etc/keepalived/check_apiserver.sh
+      fi" |sudo tee /etc/keepalived/check_apiserver.sh
 
-mkdir /etc/haproxy
-echo "# /etc/haproxy/haproxy.cfg
+sudo mkdir /etc/haproxy
+sudo echo "# /etc/haproxy/haproxy.cfg
       #---------------------------------------------------------------------
       # Global settings
       #---------------------------------------------------------------------
@@ -111,10 +114,10 @@ echo "# /etc/haproxy/haproxy.cfg
           option ssl-hello-chk
           balance     roundrobin
               server ${HOST1_ID} ${HOST1_ADDRESS}:${APISERVER_SRC_PORT} check
-              # [...]" |tee /etc/haproxy/haproxy.cfg
+              # [...]" |sudo tee /etc/haproxy/haproxy.cfg
 
-mkdir /etc/kubernetes/manifests
-echo "apiVersion: v1
+sudo mkdir /etc/kubernetes/manifests
+sudo echo "apiVersion: v1
       kind: Pod
       metadata:
         creationTimestamp: null
@@ -144,9 +147,9 @@ echo "apiVersion: v1
         - hostPath:
             path: /etc/keepalived/check_apiserver.sh
           name: check
-      status: {}" |tee /etc/kubernetes/manifests/keepalived.yaml
+      status: {}" |sudo tee /etc/kubernetes/manifests/keepalived.yaml
 
-echo "apiVersion: v1
+sudo echo "apiVersion: v1
       kind: Pod
       metadata:
         name: haproxy
@@ -172,21 +175,53 @@ echo "apiVersion: v1
             path: /etc/haproxy/haproxy.cfg
             type: FileOrCreate
           name: haproxyconf
-      status: {}" |tee /etc/kubernetes/manifests/haproxy.yaml
+      status: {}" |sudo tee /etc/kubernetes/manifests/haproxy.yaml
 
 # ------
 
+# --- Stacked ETCD Setup ---
 
+# Update HOST0, HOST1 and HOST2 with the IPs of your hosts
+export HOST0=85.215.193.16
+export HOST1=85.215.238.10
+export HOST2=85.215.160.29
 
-# Config
-#   use this config in the "kubeadm init"
-echo '# kubeadm-config.yaml
+# Update NAME0, NAME1 and NAME2 with the hostnames of your hosts
+export NAME0="jb-k8s-master-01"
+export NAME1="jb-k8s-master-02"
+export NAME2="jb-k8s-master-03"
+
+# Create temp directories to store files that will end up on other hosts
+sudo mkdir -p /tmp/${HOST0}/ /tmp/${HOST1}/ /tmp/${HOST2}/
+
+HOSTS=(${HOST0} ${HOST1} ${HOST2})
+NAMES=(${NAME0} ${NAME1} ${NAME2})
+
+for i in "${!HOSTS[@]}"; do
+HOST=${HOSTS[$i]}
+NAME=${NAMES[$i]}
+sudo cat << EOF > /tmp/${HOST}/kubeadmcfg.yaml
+# kubeadm-config.yaml
 kind: ClusterConfiguration
 apiVersion: kubeadm.k8s.io/v1beta3
-kubernetesVersion: "stable-1.25"
-controlPlaneEndpoint: "ionos-k8s.jonasbe.de:6443"
+kubernetesVersion: 'stable-1.25'
+controlPlaneEndpoint: 'ionos-k8s.jonasbe.de:6443'
 networking:
-  podSubnet: "192.168.0.0/16"
+  podSubnet: '192.168.0.0/16'
+etcd:
+    local:
+        serverCertSANs:
+        - "${HOST}"
+        peerCertSANs:
+        - "${HOST}"
+        extraArgs:
+            initial-cluster: ${NAMES[0]}=https://${HOSTS[0]}:2380,${NAMES[1]}=https://${HOSTS[1]}:2380,${NAMES[2]}=https://${HOSTS[2]}:2380
+            initial-cluster-state: new
+            name: ${NAME}
+            listen-peer-urls: https://${HOST}:2380
+            listen-client-urls: https://${HOST}:2379
+            advertise-client-urls: https://${HOST}:2379
+            initial-advertise-peer-urls: https://${HOST}:2380
 ---
 kind: KubeletConfiguration
 apiVersion: kubelet.config.k8s.io/v1beta1
@@ -195,7 +230,51 @@ cgroupDriver: systemd
 kind: InitConfiguration
 apiVersion: kubeadm.k8s.io/v1beta3
 nodeRegistration:
-  criSocket: "unix:///var/run/containerd/containerd.sock"' |tee kubeadm-config.yaml
+  criSocket: 'unix:///var/run/containerd/containerd.sock'
+      name: ${NAME}
+localAPIEndpoint:
+   advertiseAddress: ${HOST}
+EOF
+done
+
+sudo kubeadm init phase certs etcd-ca
+
+sudo kubeadm init phase certs etcd-server --config=/tmp/${HOST2}/kubeadmcfg.yaml
+sudo kubeadm init phase certs etcd-peer --config=/tmp/${HOST2}/kubeadmcfg.yaml
+sudo kubeadm init phase certs etcd-healthcheck-client --config=/tmp/${HOST2}/kubeadmcfg.yaml
+sudo kubeadm init phase certs apiserver-etcd-client --config=/tmp/${HOST2}/kubeadmcfg.yaml
+sudo cp -R /etc/kubernetes/pki /tmp/${HOST2}/
+# cleanup non-reusable certificates
+sudo find /etc/kubernetes/pki -not -name ca.crt -not -name ca.key -type f -delete
+
+sudo kubeadm init phase certs etcd-server --config=/tmp/${HOST1}/kubeadmcfg.yaml
+sudo kubeadm init phase certs etcd-peer --config=/tmp/${HOST1}/kubeadmcfg.yaml
+sudo kubeadm init phase certs etcd-healthcheck-client --config=/tmp/${HOST1}/kubeadmcfg.yaml
+sudo kubeadm init phase certs apiserver-etcd-client --config=/tmp/${HOST1}/kubeadmcfg.yaml
+sudo cp -R /etc/kubernetes/pki /tmp/${HOST1}/
+sudo find /etc/kubernetes/pki -not -name ca.crt -not -name ca.key -type f -delete
+
+sudo kubeadm init phase certs etcd-server --config=/tmp/${HOST0}/kubeadmcfg.yaml
+sudo kubeadm init phase certs etcd-peer --config=/tmp/${HOST0}/kubeadmcfg.yaml
+sudo kubeadm init phase certs etcd-healthcheck-client --config=/tmp/${HOST0}/kubeadmcfg.yaml
+sudo kubeadm init phase certs apiserver-etcd-client --config=/tmp/${HOST0}/kubeadmcfg.yaml
+# No need to move the certs because they are for HOST0
+
+# clean up certs that should not be copied off this host
+sudo find /tmp/${HOST2} -name ca.key -type f -delete
+sudo find /tmp/${HOST1} -name ca.key -type f -delete
+
+
+
+USER=k8s
+HOST=${HOST1}
+scp -r /tmp/${HOST}/* ${USER}@${HOST}:
+ssh ${USER}@${HOST}
+USER@HOST $ sudo -Es
+root@HOST $ chown -R root:root pki
+root@HOST $ mv pki /etc/kubernetes/
+
+# ------
 
 
 
