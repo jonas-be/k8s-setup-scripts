@@ -22,12 +22,9 @@ Currently used Version in the scripts:
  - Use [Calico](https://projectcalico.org) v3.24 as Pod network
 
 ## node-setup.sh
-Setup everything to run Kubernetes master or worker
+Setup everything to run Kubernetes control plane or worker
 
 ### What happens
- - Create ``k8s`` user
-   - Put this user to sudoers
-   - Copy ``authorized_keys`` from root user
  - Update system
  - Install [containerd](https://containerd.io)
  - Configure Kubernetes required stuff
@@ -36,11 +33,20 @@ Setup everything to run Kubernetes master or worker
    - kubeadm
    - kubectl
 
-## initialize-one-master.sh
-Initialize master for topology with **ONE** master
+## initialize-one-control-plane.sh
+Initialize control plane for topology with **ONE** control plane
 
 ### What happens
  - Create kubeadm-config.yaml
  - kubeadm init
  - Set .kube config
  - Apply pod network
+
+## initialize-multiple-control-plane.sh
+Initialize control plane for topology with **multiple** control planes
+
+### What happens
+- Create kubeadm-config.yaml
+- kubeadm init
+- Set .kube config
+- Apply pod network
