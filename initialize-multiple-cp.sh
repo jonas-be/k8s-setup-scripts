@@ -1,5 +1,5 @@
 #!/bin/bash
-# Initialize master for topology with ONE master
+# Initialize control plane for topology with multiple control planes
 
 cd
 
