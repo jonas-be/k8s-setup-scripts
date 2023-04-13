@@ -14,12 +14,28 @@ The scripts are made for VMs only with debian installed.
 ## Requirements
  - Debian or Ubuntu
  - Access to root user
+ - be able to make some DNS records
 
 ## Versions
 Currently used Version in the scripts:
  - Kubernetes: stable-1.25
  - Containerd: version from [Docker download](https://download.docker.com/linux/)
  - Use [Calico](https://projectcalico.org) v3.24 as Pod network
+
+## Before you start
+> **Note**
+> This **only** required for topologies with multiple control planes
+
+You have to create an `A` record for each **control plane node**.
+
+This should look something like this _(example with 3 control planes)_:
+```
+your.domain.example.	600	IN	A	<cp-node-ip-address-1>
+your.domain.example.	600	IN	A	<cp-node-ip-address-2>
+your.domain.example.	600	IN	A	<cp-node-ip-address-3>
+```
+Next you have to change the `controlPlaneEndpoint` in the `kubeadm-config.yaml`, to your domain.
+You can find the file creation, in the `initialize-multiple-control-plane.sh` file.
 
 ## node-setup.sh
 Setup everything to run Kubernetes control plane or worker
