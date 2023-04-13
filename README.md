@@ -35,9 +35,9 @@ your.domain.example.	600	IN	A	<cp-node-ip-address-2>
 your.domain.example.	600	IN	A	<cp-node-ip-address-3>
 ```
 Next you have to change the `controlPlaneEndpoint` in the `kubeadm-config.yaml`, to your domain.
-You can find the file creation, in the `initialize-multiple-control-plane.sh` file.
+You can find the file creation, in the `initialize-multiple-control-plane.sh` script.
 
-## node-setup.sh
+## node-setup-*.sh
 Setup everything to run Kubernetes control plane or worker
 
 ### What happens
