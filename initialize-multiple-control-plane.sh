@@ -9,7 +9,7 @@ echo '# kubeadm-config.yaml
 kind: ClusterConfiguration
 apiVersion: kubeadm.k8s.io/v1beta3
 kubernetesVersion: "stable-1.25"
-controlPlaneEndpoint: "ionos-k8s.jonasbe.de:6443"
+controlPlaneEndpoint: "your.domain.example:6443"
 networking:
   podSubnet: "192.168.0.0/16"
 ---
