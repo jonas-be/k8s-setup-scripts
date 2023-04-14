@@ -14,7 +14,7 @@ The scripts are made for VMs only with debian installed.
 ## Requirements
  - Debian or Ubuntu
  - Access to root user
- - be able to make some DNS records
+ - be able to make some DNS records _(only for multiple control plane topology)_
 
 ## Versions
 Currently used Version in the scripts:
@@ -59,7 +59,7 @@ Initialize control plane for topology with **ONE** control plane
  - Apply pod network
 
 ## initialize-multiple-control-plane.sh
-Initialize control plane for topology with **multiple** control planes
+Initialize control plane for topology with **multiple** control planes.
 
 ### What happens
 - Create kubeadm-config.yaml
